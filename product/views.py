@@ -1,3 +1,4 @@
+from django.db.models import Count
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .serializers import CategorySerializer, ProductSerializer, ReviewSerializer
@@ -7,7 +8,7 @@ from rest_framework import status
 
 @api_view(['GET'])
 def category_list_api_view(request):
-    category_list = Category.objects.all()
+    category_list = Category.objects.annotate(products_count=Count('products'))
     data = CategorySerializer(category_list, many=True).data
     return Response(data=data)
 
@@ -25,8 +26,17 @@ def category_detail_api_view(request, id):
 
 @api_view(['GET'])
 def product_list_api_view(request):
-    product_list = Product.objects.all()
+    product_list = Product.objects.select_related('category').prefetch_related('reviews').all()
     data = ProductSerializer(product_list, many=True).data
+
+    for product in data:
+        reviews = product['reviews']
+        if reviews:
+            average_rating = sum(review['stars'] for review in reviews) / len(reviews)
+        else:
+            average_rating = 0
+        product['average_rating'] = round(average_rating, 2)
+
     return Response(data=data)
 
 
