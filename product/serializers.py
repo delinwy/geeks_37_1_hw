@@ -3,6 +3,8 @@ from .models import Category, Product, Review
 
 
 class CategorySerializer(serializers.ModelSerializer):
+    products_count = serializers.IntegerField()
+
     class Meta:
         model = Category
         fields = '__all__'
