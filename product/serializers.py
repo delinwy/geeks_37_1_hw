@@ -4,7 +4,6 @@ from rest_framework.exceptions import ValidationError
 
 
 class CategorySerializer(serializers.ModelSerializer):
-    products_count = serializers.IntegerField()
 
     class Meta:
         model = Category
